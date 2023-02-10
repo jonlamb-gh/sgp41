@@ -18,7 +18,10 @@ fn main() {
 
     loop {
         let data = sensor.measure_raw().unwrap();
-        println!("VOC ticks: {}, NOx ticks: {}", data.voc_ticks, data.nox_ticks);
+        println!(
+            "VOC ticks: {}, NOx ticks: {}",
+            data.voc_ticks, data.nox_ticks
+        );
         hal::Delay.delay_ms(1000u16);
     }
 }

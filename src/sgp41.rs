@@ -57,10 +57,10 @@ where
         humidity: u8,
         temperature: i16,
     ) -> Result<RawSensorData, Error<E>> {
-        assert!(humidity <= 100 && temperature >= -45 && temperature <= 130);
-        let humidity_ticks = humidity as u16 * u16::MAX / 100;
+        assert!(humidity <= 100 && (-45..=130).contains(&temperature));
+        let humidity_ticks = humidity as u16 * (u16::MAX / 100);
         let temperature_ticks =
-            (temperature + 45 + self.temperature_offset) as u16 * u16::MAX / 175;
+            (temperature + 45 + self.temperature_offset) as u16 * (u16::MAX / 175);
 
         let mut buf = [0; 6];
         self.read_cmd_args(
@@ -82,7 +82,7 @@ where
     /// test as 2 bytes (+ 1 CRC byte).
     pub fn execute_self_test(&mut self) -> Result<(), Error<E>> {
         let mut buf = [0; 3];
-        self.read_cmd(Command::ExecuteConditioning, &mut buf)?;
+        self.read_cmd(Command::ExecuteSelfTest, &mut buf)?;
         // There is only two significant bits
         let err = u16::from_be_bytes([buf[0], buf[1]]) & 0b11;
         match err {
@@ -138,7 +138,8 @@ where
         let (command, delay) = cmd.as_tuple();
 
         let mut buf = [0; 8];
-        assert!(command.to_ne_bytes().len() + args.len() * 3 < buf.len());
+        //assert!(command.to_ne_bytes().len() + args.len() * 3 < buf.len());
+        assert!(command.to_ne_bytes().len() + args.len() * 3 <= buf.len());
 
         buf[0..2].copy_from_slice(&command.to_be_bytes());
 
