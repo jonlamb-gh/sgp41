@@ -54,14 +54,9 @@ where
 
     pub fn measure_raw_compensated(
         &mut self,
-        humidity: u8,
-        temperature: i16,
+        humidity_ticks: u16,
+        temperature_ticks: u16,
     ) -> Result<RawSensorData, Error<E>> {
-        assert!(humidity <= 100 && (-45..=130).contains(&temperature));
-        let humidity_ticks = humidity as u16 * (u16::MAX / 100);
-        let temperature_ticks =
-            (temperature + 45 + self.temperature_offset) as u16 * (u16::MAX / 175);
-
         let mut buf = [0; 6];
         self.read_cmd_args(
             Command::MeasureRawSignals,
